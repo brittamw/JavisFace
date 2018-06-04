@@ -84,7 +84,7 @@ public class GraphicOverlay extends View {
     public void setCameraInfo(int previewWidth, int previewHeight, int facing){
         synchronized (mLock){
             mPreviewHeight = previewHeight;
-            mPreviewWidth = mPreviewWidth;
+            mPreviewWidth = previewWidth;
             mFacing =facing;
         }
         postInvalidate();

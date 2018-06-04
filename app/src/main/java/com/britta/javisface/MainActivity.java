@@ -31,7 +31,7 @@ import com.google.android.gms.vision.face.FaceDetector;
 import java.io.IOException;
 
 
-public class MainActivity extends AppCompatActivity {
+public final class MainActivity extends AppCompatActivity {
 
     public static final String TAG ="JavisFace";
     private CameraSource mCameraSource = null;
@@ -43,11 +43,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
         setContentView(R.layout.activity_main);
-        mPreview =(CameraSourcePreview) findViewById(R.id.preview);
-        mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
+        mPreview = findViewById(R.id.preview);
+        mGraphicOverlay = findViewById(R.id.faceOverlay);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if(rc == PackageManager.PERMISSION_GRANTED){
@@ -89,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
         Context context = getApplicationContext();
         FaceDetector detector = new FaceDetector.Builder(context).setClassificationType(FaceDetector.ALL_CLASSIFICATIONS).build();
+
+        detector.setProcessor(new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
+                        .build());
 
         if(!detector.isOperational()){
             Log.w(TAG, "Gesichterkennung noch nicht vollständig geladen");
@@ -132,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        Log.e(TAG, "Zugriff nicht erlaubt: results len = " + grantResults.length +
+        Log.e(TAG, "Zugriff nicht erlaubt:  " + grantResults.length +
                 " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
 
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -184,5 +187,28 @@ public class MainActivity extends AppCompatActivity {
             mOverlay = overlay;
             mFaceGraphic = new FaceGraphic(overlay);
         }
+
+        @Override
+        public void onNewItem(int faceID, Face item){
+            mFaceGraphic.setID(faceID);
+        }
+        @Override
+        public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face){
+            mOverlay.add(mFaceGraphic);
+            mFaceGraphic.updateFace(face);
+        }
+        @Override
+        public void onMissing(FaceDetector.Detections<Face> detectionResults){
+            mOverlay.remove(mFaceGraphic);
+        }
+
+        @Override
+        public void onDone(){
+            mOverlay.remove(mFaceGraphic);
+        }
+
     }
+
+
+
 }
