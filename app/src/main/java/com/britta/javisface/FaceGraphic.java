@@ -1,12 +1,20 @@
 package com.britta.javisface;
 
+import android.app.Application;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.media.FaceDetector;
+import android.graphics.drawable.BitmapDrawable;
+import android.app.Activity;
 
 import com.britta.javisface.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.Landmark;
 
 class FaceGraphic extends GraphicOverlay.Graphic {
 
@@ -15,6 +23,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     private static final float ID_Y_OFFSET = 50.0f;
     private static final float ID_X_OFFSET = -50.0f;
     private static final float BOX_STROKE_WIDTH = 5.0f;
+
+    //private Landmark landmark;
+
+
 
     private static final int COLOR_CHOICES[]={
             Color.BLUE,
@@ -31,6 +43,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     private Paint mFacePositionPaint;
     private Paint mIDPaint;
     private Paint mBoxPaint;
+    private Paint mLandmarkPaint;
 
     private volatile Face mFace;
     private int mFaceID;
@@ -53,6 +66,9 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         mBoxPaint.setStyle(Paint.Style.STROKE);
         mBoxPaint.setStrokeWidth(BOX_STROKE_WIDTH);
 
+        mLandmarkPaint = new Paint();
+        mLandmarkPaint.setColor(selectedColor);
+
     }
 
     void setID(int id) {
@@ -63,6 +79,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         mFace = face;
         postInvalidate();
     }
+
 
 
 
@@ -92,6 +109,30 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float bottom = y+yOffset;
         canvas.drawRect(left, top, right,bottom, mBoxPaint);
 
+
+        for (Landmark landmark: face.getLandmarks()){
+            int cx = (int) (landmark.getPosition().x);
+            int cy = (int) (landmark.getPosition().y);
+            //zum Landamrks markieren:
+            canvas.drawCircle(cx, cy, 10.0f, mLandmarkPaint);
+
+            //landmark mit IDs
+            //String type = String.valueOf(landmark.getType());
+            //mBoxPaint.setTextSize(50.0f);
+            //canvas.drawText(type, cx,cy, mBoxPaint);
+
+
+
+          // if(landmark.getType()== 4){
+               // Bitmap bMap = BitmapFactory.decodeFile("C:\\Users\\Britta\\Desktop\\BA\\akiszalia.png");
+              //  canvas.drawBitmap(bMap,cx,cy,mBoxPaint);
+          // }
+
+
+
+
+
+        }
 
 
     }

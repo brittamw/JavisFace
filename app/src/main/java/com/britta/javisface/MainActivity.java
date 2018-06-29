@@ -9,6 +9,8 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Trace;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -41,6 +43,7 @@ public final class MainActivity extends AppCompatActivity {
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
+   //
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -88,6 +91,8 @@ public final class MainActivity extends AppCompatActivity {
     private void createCameraSource(){
 
         Context context = getApplicationContext();
+       // Bitmap bMap = BitmapFactory.decodeResource(getResources(), R.drawable.akiszalia);
+
         FaceDetector detector = new FaceDetector.Builder(context).setClassificationType(FaceDetector.ALL_CLASSIFICATIONS).build();
 
         detector.setProcessor(new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
@@ -98,7 +103,7 @@ public final class MainActivity extends AppCompatActivity {
         }
 
         mCameraSource = new CameraSource.Builder(context, detector).setRequestedPreviewSize(640, 480)
-                .setFacing(CameraSource.CAMERA_FACING_BACK).setRequestedFps(30.0f).build();
+                .setFacing(CameraSource.CAMERA_FACING_FRONT).setRequestedFps(30.0f).build();
     }
 
     @Override
@@ -148,6 +153,7 @@ public final class MainActivity extends AppCompatActivity {
         builder.setTitle("Javis Face").setMessage("App kann nicht ausgeführt werden, da kein Kamerazugriff gewährt")
                 .setPositiveButton("OK", listener).show();
     }
+
 
 
     private void startCameraSource(){
