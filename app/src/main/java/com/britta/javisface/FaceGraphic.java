@@ -108,13 +108,19 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float right = x + xOffset;
         float bottom = y+yOffset;
         canvas.drawRect(left, top, right,bottom, mBoxPaint);
-
+        
 
         for (Landmark landmark: face.getLandmarks()){
-            int cx = (int) (landmark.getPosition().x);
-            int cy = (int) (landmark.getPosition().y);
-            //zum Landamrks markieren:
+            int cx = (int) translateX(landmark.getPosition().x );
+            int cy = (int) translateY(landmark.getPosition().y );
+
+
+                //zum Landamrks markieren:
             canvas.drawCircle(cx, cy, 10.0f, mLandmarkPaint);
+
+
+            }
+
 
             //landmark mit IDs
             //String type = String.valueOf(landmark.getType());
@@ -132,8 +138,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
 
 
-        }
-
 
     }
+
 }
