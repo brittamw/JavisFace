@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.os.Trace;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -39,7 +40,6 @@ public final class MainActivity extends AppCompatActivity {
     private CameraSource mCameraSource = null;
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
-
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
@@ -91,7 +91,7 @@ public final class MainActivity extends AppCompatActivity {
     private void createCameraSource(){
 
         Context context = getApplicationContext();
-       // Bitmap bMap = BitmapFactory.decodeResource(getResources(), R.drawable.akiszalia);
+        //Bitmap bMap = BitmapFactory.decodeResource(getResources(), R.drawable.akiszalia);
 
         FaceDetector detector = new FaceDetector.Builder(context).setClassificationType(FaceDetector.ALL_CLASSIFICATIONS).build();
 

@@ -1,17 +1,11 @@
 package com.britta.javisface;
 
-import android.app.Application;
-import android.content.res.Resources;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.media.FaceDetector;
-import android.graphics.drawable.BitmapDrawable;
-import android.app.Activity;
-
 import com.britta.javisface.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
@@ -23,8 +17,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     private static final float ID_Y_OFFSET = 50.0f;
     private static final float ID_X_OFFSET = -50.0f;
     private static final float BOX_STROKE_WIDTH = 5.0f;
-
-    //private Landmark landmark;
 
 
 
@@ -47,7 +39,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
     private volatile Face mFace;
     private int mFaceID;
-    //private float mHappiness;
+    private float mHappiness;
 
     FaceGraphic(GraphicOverlay overlay){
         super(overlay);
@@ -80,13 +72,6 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         postInvalidate();
     }
 
-
-
-
-
-
-
-
     @Override
     public void draw(Canvas canvas) {
 
@@ -94,11 +79,12 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         if(face == null){
             return;
         }
-
+        mHappiness = face.getIsSmilingProbability()*100;
         float x = translateX(face.getPosition().x + face.getWidth()/2);
         float y = translateY(face.getPosition().y + face.getHeight()/2);
         canvas.drawCircle(x,y, FACE_POSITION_RADIUS,mFacePositionPaint);
-        canvas.drawText("ID "+ mFaceID, x+ID_X_OFFSET, y+ID_Y_OFFSET,mIDPaint);
+        //canvas.drawText("ID "+ mFaceID, x+ID_X_OFFSET, y+ID_Y_OFFSET,mIDPaint);
+        canvas.drawText("Happines: "+mHappiness+ "%", x,y,mIDPaint);
 
         float xOffset = scaleX(face.getWidth()/2.0f);
         float yOffset = scaleY(face.getHeight()/2.0f);
@@ -108,34 +94,38 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float right = x + xOffset;
         float bottom = y+yOffset;
         canvas.drawRect(left, top, right,bottom, mBoxPaint);
-        
+
 
         for (Landmark landmark: face.getLandmarks()){
             int cx = (int) translateX(landmark.getPosition().x );
             int cy = (int) translateY(landmark.getPosition().y );
-
-
-                //zum Landamrks markieren:
+            //zum Landamrks markieren:
             canvas.drawCircle(cx, cy, 10.0f, mLandmarkPaint);
 
 
-            }
-
-
-            //landmark mit IDs
+            //landmark mit TypeIDs
             //String type = String.valueOf(landmark.getType());
-            //mBoxPaint.setTextSize(50.0f);
-            //canvas.drawText(type, cx,cy, mBoxPaint);
+            //mLandmarkPaint.setTextSize(50.0f);
+            //canvas.drawText(type, cx,cy, mLandmarkPaint);
+
+        /*landmark typeIDs:
+            linkes auge: 4
+            rechtes auge: 10
+            nasenspitze: 6
+            wange links : 1
+            wange rechts: 7
+            mundwinkel links: 5
+            mundwinkel rechts: 11
+            mund center: 0
+            */
+
+          /*if(landmark.getType()== 4){
+              Bitmap bmap = Bitmap.createBitmap();
+              canvas.drawBitmap(bmap,cx,cy,mBoxPaint);
+           }*/
 
 
-
-          // if(landmark.getType()== 4){
-               // Bitmap bMap = BitmapFactory.decodeFile("C:\\Users\\Britta\\Desktop\\BA\\akiszalia.png");
-              //  canvas.drawBitmap(bMap,cx,cy,mBoxPaint);
-          // }
-
-
-
+        }
 
 
 
