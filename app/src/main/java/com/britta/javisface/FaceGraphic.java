@@ -79,12 +79,15 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         if(face == null){
             return;
         }
+
         mHappiness = face.getIsSmilingProbability()*100;
+
+
         float x = translateX(face.getPosition().x + face.getWidth()/2);
         float y = translateY(face.getPosition().y + face.getHeight()/2);
         canvas.drawCircle(x,y, FACE_POSITION_RADIUS,mFacePositionPaint);
         //canvas.drawText("ID "+ mFaceID, x+ID_X_OFFSET, y+ID_Y_OFFSET,mIDPaint);
-        canvas.drawText("Happines: "+mHappiness+ "%", x,y,mIDPaint);
+        canvas.drawText("Happines: "+Math.floor(mHappiness)+ "%", x,y,mIDPaint);
 
         float xOffset = scaleX(face.getWidth()/2.0f);
         float yOffset = scaleY(face.getHeight()/2.0f);
