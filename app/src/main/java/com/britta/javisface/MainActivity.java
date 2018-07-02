@@ -62,9 +62,11 @@ public final class MainActivity extends AppCompatActivity {
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private float rotation = 0.0f;
     private Button snapButton;
-    private File dir;
-    private File imageFile;
-    
+
+
+
+
+
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -76,7 +78,8 @@ public final class MainActivity extends AppCompatActivity {
         snapButton = (Button)findViewById(R.id.captureBtn);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if(rc == PackageManager.PERMISSION_GRANTED){
+        int we = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if(rc == PackageManager.PERMISSION_GRANTED&& we ==PackageManager.PERMISSION_GRANTED){
             createCameraSource();
             snapButton.setOnClickListener(new View.OnClickListener() {
                 @Override
