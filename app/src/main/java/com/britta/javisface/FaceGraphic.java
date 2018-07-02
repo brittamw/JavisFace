@@ -38,7 +38,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private Paint mBoxPaint;
     private Paint mLandmarkPaint;
 
-    private Bitmap bmap;
+    private Bitmap bmapGreenEye;
+    private Bitmap bmapEyepatch;
     private BitmapFactory.Options options;
     private Resources resources;
 
@@ -53,7 +54,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         options=new BitmapFactory.Options();
         options.inScaled = false;
         resources = context.getResources();
-        bmap = BitmapFactory.decodeResource(resources, R.drawable.akiszalia, options);
+        bmapGreenEye = BitmapFactory.decodeResource(resources, R.drawable.akiszalia, options);
+        bmapEyepatch = BitmapFactory.decodeResource(resources, R.drawable.eyepatch);
 
         mCurrentColorIndex =(mCurrentColorIndex+1)% COLOR_CHOICES.length;
         final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
@@ -115,15 +117,14 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             int cx = (int) translateX(landmark.getPosition().x );
             int cy = (int) translateY(landmark.getPosition().y );
             //zum Landamrks markieren:
-            canvas.drawCircle(cx, cy, 10.0f, mLandmarkPaint);
-
+            //canvas.drawCircle(cx, cy, 10.0f, mLandmarkPaint);
 
             //landmark mit TypeIDs
             //String type = String.valueOf(landmark.getType());
             //mLandmarkPaint.setTextSize(50.0f);
             //canvas.drawText(type, cx,cy, mLandmarkPaint);
 
-        /*landmark typeIDs:
+            /*landmark typeIDs:
             linkes auge: 4
             rechtes auge: 10
             nasenspitze: 6
@@ -134,10 +135,15 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
             mund center: 0
             */
 
-          if(landmark.getType()== 4){
+            if(landmark.getType()== Landmark.LEFT_EYE){
+              Bitmap scaledGreenEyeBm = Bitmap.createScaledBitmap(bmapGreenEye,50,50,true);
 
-              canvas.drawBitmap(bmap,cx,cy,mBoxPaint);
-           }
+              canvas.drawBitmap(scaledGreenEyeBm,cx,cy,mBoxPaint);
+             }
+           // if(landmark.getType()==Landmark.RIGHT_EYE){
+             //   Bitmap scaledEyepatchBm = Bitmap.createScaledBitmap(bmapEyepatch, 100,100,true);
+               // canvas.drawBitmap(scaledEyepatchBm,cx,cy, mBoxPaint);
+            //}
 
 
         }

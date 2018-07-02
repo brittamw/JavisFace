@@ -6,17 +6,21 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.hardware.camera2.CameraManager;
 import android.media.ImageReader;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +29,7 @@ import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.britta.javisface.ui.camera.CameraSourcePreview;
 import com.britta.javisface.ui.camera.GraphicOverlay;
@@ -37,8 +42,13 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public final class MainActivity extends AppCompatActivity {
@@ -50,8 +60,10 @@ public final class MainActivity extends AppCompatActivity {
     private GraphicOverlay mGraphicOverlay;
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
-
+    private float rotation = 0.0f;
     private Button snapButton;
+    private File dir;
+    private File imageFile;
     
 
     @Override
@@ -61,22 +73,57 @@ public final class MainActivity extends AppCompatActivity {
         context=getApplicationContext();
         mPreview = findViewById(R.id.preview);
         mGraphicOverlay = findViewById(R.id.faceOverlay);
+        snapButton = (Button)findViewById(R.id.captureBtn);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if(rc == PackageManager.PERMISSION_GRANTED){
             createCameraSource();
+            snapButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
+                        @Override
+                        public void onPictureTaken(byte[] bytes) {
+                            snapPhoto(bytes);
+                        }
+                        private void snapPhoto(byte[] bytes){
+                            try{
+                                String mainpath = Environment.getExternalStorageDirectory().getAbsolutePath()+File.separator + "myphoto.jpg";
+                                File basePath = new File(mainpath);
+                                Log.d("mainpath", mainpath);
+                                if(!basePath.exists()){
+                                    Log.d("CAPTURE_BASE_PATH", basePath.mkdirs()? "Success":"failed");
+                                }
+                                File captureFile = new File(mainpath+ "photo_"+getPhotoTime()+ ".jpg");
+                                if(!captureFile.exists()){
+                                    Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success": "Failed");
+                                }
+                                FileOutputStream stream = new FileOutputStream(captureFile);
+                                stream.write(bytes);
+                                stream.flush();
+                                stream.close();
+
+                            }catch(IOException e){
+                                e.printStackTrace();
+
+                            }
+                        }
+                        private String getPhotoTime(){
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy_hhmmss");
+
+                            return dateFormat.format(new Date());
+                        }
+                    });
+                    Log.d(TAG, "onClick: Hello");
+                    snapButton.setEnabled(false);
+                }
+            });
         }
         else{
             requestCameraPermission();
         }
 
-       /* snapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-               // takePicture();
-                Log.d(TAG, "onClick: Hello");
-            }
-        });*/
+       /* */
     }
 
     private void requestCameraPermission() {
@@ -233,13 +280,7 @@ public final class MainActivity extends AppCompatActivity {
 
     }
 
-    /*private void takePicture(){
-        if (mCameraSource==null){
-            return;
-            CameraManager manager =(CameraManager)getSystemService(Context.CAMERA_SERVICE);
-                    try
-        }
-    }*/
+
 
 
 }
