@@ -12,13 +12,19 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.hardware.camera2.CameraManager;
+import android.media.ImageReader;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Trace;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
+import android.widget.Button;
 
 import com.britta.javisface.ui.camera.CameraSourcePreview;
 import com.britta.javisface.ui.camera.GraphicOverlay;
@@ -31,24 +37,28 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import java.io.File;
 import java.io.IOException;
 
 
 public final class MainActivity extends AppCompatActivity {
 
     public static final String TAG ="JavisFace";
+    private Context context;
     private CameraSource mCameraSource = null;
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
-   //
+    private Button snapButton;
+    
 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_main);
+        context=getApplicationContext();
         mPreview = findViewById(R.id.preview);
         mGraphicOverlay = findViewById(R.id.faceOverlay);
 
@@ -59,6 +69,14 @@ public final class MainActivity extends AppCompatActivity {
         else{
             requestCameraPermission();
         }
+
+       /* snapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               // takePicture();
+                Log.d(TAG, "onClick: Hello");
+            }
+        });*/
     }
 
     private void requestCameraPermission() {
@@ -90,7 +108,7 @@ public final class MainActivity extends AppCompatActivity {
 
     private void createCameraSource(){
 
-        Context context = getApplicationContext();
+        //Context context = getApplicationContext();
         //Bitmap bMap = BitmapFactory.decodeResource(getResources(), R.drawable.akiszalia);
 
         FaceDetector detector = new FaceDetector.Builder(context).setClassificationType(FaceDetector.ALL_CLASSIFICATIONS).build();
@@ -191,7 +209,7 @@ public final class MainActivity extends AppCompatActivity {
 
         GraphicFaceTracker(GraphicOverlay overlay){
             mOverlay = overlay;
-            mFaceGraphic = new FaceGraphic(overlay);
+            mFaceGraphic = new FaceGraphic(overlay, context);
         }
 
         @Override
@@ -215,6 +233,13 @@ public final class MainActivity extends AppCompatActivity {
 
     }
 
+    /*private void takePicture(){
+        if (mCameraSource==null){
+            return;
+            CameraManager manager =(CameraManager)getSystemService(Context.CAMERA_SERVICE);
+                    try
+        }
+    }*/
 
 
 }

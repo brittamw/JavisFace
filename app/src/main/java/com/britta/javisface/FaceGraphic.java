@@ -1,6 +1,7 @@
 package com.britta.javisface;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -10,7 +11,7 @@ import com.britta.javisface.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
 
-class FaceGraphic extends GraphicOverlay.Graphic {
+public class FaceGraphic extends GraphicOverlay.Graphic {
 
     private static final float FACE_POSITION_RADIUS = 10.0f;
     private static final float ID_TEXT_SIZE = 40.0f;
@@ -37,12 +38,23 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     private Paint mBoxPaint;
     private Paint mLandmarkPaint;
 
+    private Bitmap bmap;
+    private BitmapFactory.Options options;
+    private Resources resources;
+
+
     private volatile Face mFace;
     private int mFaceID;
     private float mHappiness;
 
-    FaceGraphic(GraphicOverlay overlay){
+    public FaceGraphic(GraphicOverlay overlay, Context context){
         super(overlay);
+
+        options=new BitmapFactory.Options();
+        options.inScaled = false;
+        resources = context.getResources();
+        bmap = BitmapFactory.decodeResource(resources, R.drawable.akiszalia, options);
+
         mCurrentColorIndex =(mCurrentColorIndex+1)% COLOR_CHOICES.length;
         final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
 
@@ -87,7 +99,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float y = translateY(face.getPosition().y + face.getHeight()/2);
         canvas.drawCircle(x,y, FACE_POSITION_RADIUS,mFacePositionPaint);
         //canvas.drawText("ID "+ mFaceID, x+ID_X_OFFSET, y+ID_Y_OFFSET,mIDPaint);
-        canvas.drawText("Happines: "+Math.floor(mHappiness)+ "%", x,y,mIDPaint);
+       // canvas.drawText("Happines: "+Math.floor(mHappiness)+ "%", x,y,mIDPaint);
 
         float xOffset = scaleX(face.getWidth()/2.0f);
         float yOffset = scaleY(face.getHeight()/2.0f);
@@ -122,10 +134,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             mund center: 0
             */
 
-          /*if(landmark.getType()== 4){
-              Bitmap bmap = Bitmap.createBitmap();
+          if(landmark.getType()== 4){
+
               canvas.drawBitmap(bmap,cx,cy,mBoxPaint);
-           }*/
+           }
 
 
         }

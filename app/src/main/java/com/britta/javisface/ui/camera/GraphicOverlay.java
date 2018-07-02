@@ -27,6 +27,7 @@ public class GraphicOverlay extends View {
             mOverlay=overlay;
         }
 
+
         public abstract void draw(Canvas canvas);
 
         public float scaleX(float horizontal){
@@ -53,6 +54,9 @@ public class GraphicOverlay extends View {
         public void postInvalidate(){
             mOverlay.postInvalidate();
         }
+    }
+    public GraphicOverlay(Context context) {
+        super(context);
     }
 
     public GraphicOverlay(Context context, AttributeSet attrs) {
