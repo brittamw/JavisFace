@@ -63,7 +63,11 @@ public final class MainActivity extends AppCompatActivity {
     private float rotation = 0.0f;
     private Button snapButton;
 
-
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
 
 
@@ -75,12 +79,13 @@ public final class MainActivity extends AppCompatActivity {
         context=getApplicationContext();
         mPreview = findViewById(R.id.preview);
         mGraphicOverlay = findViewById(R.id.faceOverlay);
-        snapButton = (Button)findViewById(R.id.captureBtn);
+        snapButton = findViewById(R.id.captureBtn);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        int we = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if(rc == PackageManager.PERMISSION_GRANTED&& we ==PackageManager.PERMISSION_GRANTED){
+        //int we = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if(rc == PackageManager.PERMISSION_GRANTED){
             createCameraSource();
+            verifyStoragePermissions(this);
             snapButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -157,9 +162,6 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void createCameraSource(){
-
-        //Context context = getApplicationContext();
-        //Bitmap bMap = BitmapFactory.decodeResource(getResources(), R.drawable.akiszalia);
 
         FaceDetector detector = new FaceDetector.Builder(context).setClassificationType(FaceDetector.ALL_CLASSIFICATIONS).build();
 
@@ -281,6 +283,18 @@ public final class MainActivity extends AppCompatActivity {
             mOverlay.remove(mFaceGraphic);
         }
 
+    }
+
+    public static void verifyStoragePermissions(Activity activity) {
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
     }
 
 
