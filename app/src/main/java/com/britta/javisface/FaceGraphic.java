@@ -101,7 +101,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         float y = translateY(face.getPosition().y + face.getHeight()/2);
         canvas.drawCircle(x,y, FACE_POSITION_RADIUS,mFacePositionPaint);
         //canvas.drawText("ID "+ mFaceID, x+ID_X_OFFSET, y+ID_Y_OFFSET,mIDPaint);
-       // canvas.drawText("Happines: "+Math.floor(mHappiness)+ "%", x,y,mIDPaint);
+       //canvas.drawText("Happines: "+Math.floor(mHappiness)+ "%", x,y,mIDPaint);
 
         float xOffset = scaleX(face.getWidth()/2.0f);
         float yOffset = scaleY(face.getHeight()/2.0f);
@@ -116,24 +116,13 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         for (Landmark landmark: face.getLandmarks()){
             int cx = (int) translateX(landmark.getPosition().x );
             int cy = (int) translateY(landmark.getPosition().y );
-            //zum Landamrks markieren:
-            //canvas.drawCircle(cx, cy, 10.0f, mLandmarkPaint);
+
 
             //landmark mit TypeIDs
             //String type = String.valueOf(landmark.getType());
             //mLandmarkPaint.setTextSize(50.0f);
             //canvas.drawText(type, cx,cy, mLandmarkPaint);
 
-            /*landmark typeIDs:
-            linkes auge: 4
-            rechtes auge: 10
-            nasenspitze: 6
-            wange links : 1
-            wange rechts: 7
-            mundwinkel links: 5
-            mundwinkel rechts: 11
-            mund center: 0
-            */
 
             if(landmark.getType()== Landmark.LEFT_EYE){
               Bitmap scaledGreenEyeBm = Bitmap.createScaledBitmap(bmapGreenEye,50,50,true);
@@ -147,8 +136,6 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
         }
-
-
 
     }
 

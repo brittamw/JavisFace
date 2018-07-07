@@ -60,7 +60,7 @@ public final class MainActivity extends AppCompatActivity {
     private GraphicOverlay mGraphicOverlay;
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
-    private float rotation = 0.0f;
+    private float mHappiness;
     private Button snapButton;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -94,36 +94,10 @@ public final class MainActivity extends AppCompatActivity {
                         public void onPictureTaken(byte[] bytes) {
                             snapPhoto(bytes);
                         }
-                        private void snapPhoto(byte[] bytes){
-                            try{
-                                String mainpath = Environment.getExternalStorageDirectory().getAbsolutePath()+File.separator + "myphoto.jpg";
-                                File basePath = new File(mainpath);
-                                Log.d("mainpath", mainpath);
-                                if(!basePath.exists()){
-                                    Log.d("CAPTURE_BASE_PATH", basePath.mkdirs()? "Success":"failed");
-                                }
-                                File captureFile = new File(mainpath+ "photo_"+getPhotoTime()+ ".jpg");
-                                if(!captureFile.exists()){
-                                    Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success": "Failed");
-                                }
-                                FileOutputStream stream = new FileOutputStream(captureFile);
-                                stream.write(bytes);
-                                stream.flush();
-                                stream.close();
 
-                            }catch(IOException e){
-                                e.printStackTrace();
-
-                            }
-                        }
-                        private String getPhotoTime(){
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy_hhmmss");
-
-                            return dateFormat.format(new Date());
-                        }
                     });
                     Log.d(TAG, "onClick: Hello");
-                    snapButton.setEnabled(false);
+                    //snapButton.setEnabled(false);
                 }
             });
         }
@@ -272,6 +246,17 @@ public final class MainActivity extends AppCompatActivity {
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face){
             mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
+            mHappiness=face.getIsSmilingProbability()*100.0f;
+            if(mHappiness>= 50.0f){
+                mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
+                    @Override
+                    public void onPictureTaken(byte[] bytes) {
+                        snapPhoto(bytes);
+                    }
+
+                });
+            }
+
         }
         @Override
         public void onMissing(FaceDetector.Detections<Face> detectionResults){
@@ -295,6 +280,34 @@ public final class MainActivity extends AppCompatActivity {
                     REQUEST_EXTERNAL_STORAGE
             );
         }
+    }
+
+    private void snapPhoto(byte[] bytes){
+        try{
+            String mainpath = Environment.getExternalStorageDirectory().getAbsolutePath()+File.separator;
+            File basePath = new File(mainpath);
+            Log.d("mainpath", mainpath);
+            if(!basePath.exists()){
+                Log.d("CAPTURE_BASE_PATH", basePath.mkdirs()? "Success":"failed");
+            }
+            File captureFile = new File(mainpath+ "photo_"+getPhotoTime()+ ".jpg");
+            if(!captureFile.exists()){
+                Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success": "Failed");
+            }
+            FileOutputStream stream = new FileOutputStream(captureFile);
+            stream.write(bytes);
+            stream.flush();
+            stream.close();
+
+        }catch(IOException e){
+            e.printStackTrace();
+
+        }
+    }
+    private String getPhotoTime(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy_hhmmss");
+
+        return dateFormat.format(new Date());
     }
 
 
