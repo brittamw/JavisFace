@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.hardware.camera2.CameraManager;
 import android.media.ImageReader;
 import android.os.Environment;
@@ -65,11 +66,7 @@ public final class MainActivity extends AppCompatActivity {
     private Button snapButton;
     private Button switchButton;
 
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
+
 
 
 
@@ -85,7 +82,6 @@ public final class MainActivity extends AppCompatActivity {
         switchButton = findViewById(R.id.switchBtn);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        //int we = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if(rc == PackageManager.PERMISSION_GRANTED){
             createCameraSource(1);
             verifyStoragePermissions(this);
@@ -284,6 +280,11 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     public static void verifyStoragePermissions(Activity activity) {
+        int REQUEST_EXTERNAL_STORAGE = 1;
+        String[] PERMISSIONS_STORAGE = {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
         int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED) {
 
@@ -296,26 +297,34 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     private void snapPhoto(byte[] bytes){
-        try{
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        Bitmap face = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+
+        mGraphicOverlay.setDrawingCacheEnabled(true);
+        Bitmap overlay = mGraphicOverlay.getDrawingCache();
+
+        Bitmap result = mergeBitmaps(face, overlay);
+
+        try {
             String mainpath = Environment.getExternalStorageDirectory().getAbsolutePath()+File.separator;
             File basePath = new File(mainpath);
-            Log.d("mainpath", mainpath);
-            if(!basePath.exists()){
-                Log.d("CAPTURE_BASE_PATH", basePath.mkdirs()? "Success":"failed");
-            }
-            File captureFile = new File(mainpath+ "photo_"+getPhotoTime()+ ".jpg");
-            if(!captureFile.exists()){
+            if (!basePath.exists())
+                Log.d("CAPTURE_BASE_PATH", basePath.mkdirs() ? "Success": "Failed");
+            String path = mainpath + "photo_" + getPhotoTime() + ".jpg";
+            File captureFile = new File(path);
+            captureFile.createNewFile();
+            if (!captureFile.exists())
                 Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success": "Failed");
-            }
             FileOutputStream stream = new FileOutputStream(captureFile);
-            stream.write(bytes);
+            result.compress(Bitmap.CompressFormat.PNG, 100, stream);
             stream.flush();
             stream.close();
-
-        }catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-
         }
+
+
     }
     private String getPhotoTime(){
         SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy_hhmmss");
@@ -343,6 +352,21 @@ public final class MainActivity extends AppCompatActivity {
         startCameraSource();
     }
 
+    public Bitmap mergeBitmaps(Bitmap face, Bitmap overlay) {
+        // Create a new image with target size
+        int width = face.getWidth();
+        int height = face.getHeight();
+        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        Rect faceRect = new Rect(0,0,width,height);
+        Rect overlayRect = new Rect(0,0,overlay.getWidth(),overlay.getHeight());
+
+        // Draw face and then overlay (Make sure rects are as needed)
+        Canvas canvas = new Canvas(newBitmap);
+        canvas.drawBitmap(face, faceRect, faceRect, null);
+        canvas.drawBitmap(overlay, overlayRect, faceRect, null);
+        return newBitmap;
+    }
 
 
 }
