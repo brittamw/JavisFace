@@ -56,12 +56,14 @@ public final class MainActivity extends AppCompatActivity {
     public static final String TAG ="JavisFace";
     private Context context;
     private CameraSource mCameraSource = null;
+    private CameraSource mCameraSource2;
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
     private float mHappiness;
     private Button snapButton;
+    private Button switchButton;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -80,11 +82,12 @@ public final class MainActivity extends AppCompatActivity {
         mPreview = findViewById(R.id.preview);
         mGraphicOverlay = findViewById(R.id.faceOverlay);
         snapButton = findViewById(R.id.captureBtn);
+        switchButton = findViewById(R.id.switchBtn);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         //int we = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if(rc == PackageManager.PERMISSION_GRANTED){
-            createCameraSource();
+            createCameraSource(1);
             verifyStoragePermissions(this);
             snapButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -98,6 +101,14 @@ public final class MainActivity extends AppCompatActivity {
                     });
                     Log.d(TAG, "onClick: Hello");
                     //snapButton.setEnabled(false);
+                }
+            });
+            switchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    switchCamera();
+                    Log.d(TAG, "onClick: hallo?");
+
                 }
             });
         }
@@ -135,7 +146,7 @@ public final class MainActivity extends AppCompatActivity {
 
     }
 
-    private void createCameraSource(){
+    private void createCameraSource(int facing){
 
         FaceDetector detector = new FaceDetector.Builder(context).setClassificationType(FaceDetector.ALL_CLASSIFICATIONS).build();
 
@@ -147,8 +158,10 @@ public final class MainActivity extends AppCompatActivity {
         }
 
         mCameraSource = new CameraSource.Builder(context, detector).setRequestedPreviewSize(640, 480)
-                .setFacing(CameraSource.CAMERA_FACING_FRONT).setRequestedFps(30.0f).build();
+                .setFacing(facing).setRequestedFps(30.0f).build();
     }
+
+
 
     @Override
     protected void onResume(){
@@ -180,7 +193,7 @@ public final class MainActivity extends AppCompatActivity {
 
         if(grantResults.length != 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
             Log.d(TAG, "Zugriff erlaubt. Kamera wird initialisiert");
-            createCameraSource();
+            createCameraSource(1);
             return;
         }
 
@@ -248,13 +261,13 @@ public final class MainActivity extends AppCompatActivity {
             mFaceGraphic.updateFace(face);
             mHappiness=face.getIsSmilingProbability()*100.0f;
             if(mHappiness>= 50.0f){
-                mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
-                    @Override
-                    public void onPictureTaken(byte[] bytes) {
-                        snapPhoto(bytes);
-                    }
+               // mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
+                 //   @Override
+                   // public void onPictureTaken(byte[] bytes) {
+                     //   snapPhoto(bytes);
+                    //}
 
-                });
+                //});
             }
 
         }
@@ -310,6 +323,25 @@ public final class MainActivity extends AppCompatActivity {
         return dateFormat.format(new Date());
     }
 
+    private void switchCamera(){
+
+        if(mCameraSource.getCameraFacing()==CameraSource.CAMERA_FACING_FRONT){
+
+            if (mCameraSource != null) {
+                mCameraSource.release();
+            }
+            createCameraSource(0);
+        }
+        else{
+
+            if (mCameraSource != null) {
+                mCameraSource.release();
+            }
+            createCameraSource(1);
+        }
+
+        startCameraSource();
+    }
 
 
 
