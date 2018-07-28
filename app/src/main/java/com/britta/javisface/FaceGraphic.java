@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
+
 import com.britta.javisface.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
@@ -19,7 +21,9 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private static final float ID_X_OFFSET = -50.0f;
     private static final float BOX_STROKE_WIDTH = 5.0f;
 
+    private static final String TAG ="FaceGraphic";
 
+    
 
     private static final int COLOR_CHOICES[]={
             Color.BLUE,
@@ -42,14 +46,17 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private Bitmap bmapEyepatch;
     private BitmapFactory.Options options;
     private Resources resources;
+    public static boolean isFilterenabled;
 
 
     private volatile Face mFace;
     private int mFaceID;
     private float mHappiness;
+    
 
     public FaceGraphic(GraphicOverlay overlay, Context context){
         super(overlay);
+
 
         options=new BitmapFactory.Options();
         options.inScaled = false;
@@ -75,6 +82,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         mLandmarkPaint = new Paint();
         mLandmarkPaint.setColor(selectedColor);
 
+
+
     }
 
     void setID(int id) {
@@ -89,18 +98,20 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     @Override
     public void draw(Canvas canvas) {
 
+
+
         Face face = mFace;
         if(face == null){
             return;
         }
-
         mHappiness = face.getIsSmilingProbability()*100;
+
 
 
         float x = translateX(face.getPosition().x + face.getWidth()/2);
         float y = translateY(face.getPosition().y + face.getHeight()/2);
-        canvas.drawCircle(x,y, FACE_POSITION_RADIUS,mFacePositionPaint);
-        //canvas.drawText("ID "+ mFaceID, x+ID_X_OFFSET, y+ID_Y_OFFSET,mIDPaint);
+        //canvas.drawCircle(x,y, FACE_POSITION_RADIUS,mFacePositionPaint);
+
        //canvas.drawText("Happines: "+Math.floor(mHappiness)+ "%", x,y,mIDPaint);
 
         float xOffset = scaleX(face.getWidth()/2.0f);
@@ -110,33 +121,42 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         float top = y-yOffset;
         float right = x + xOffset;
         float bottom = y+yOffset;
-        canvas.drawRect(left, top, right,bottom, mBoxPaint);
 
 
-        for (Landmark landmark: face.getLandmarks()){
-            int cx = (int) translateX(landmark.getPosition().x );
-            int cy = (int) translateY(landmark.getPosition().y );
 
+       if(isFilterenabled){
+           Log.d(TAG, "draw: helloo filterenabled is truee");
+           canvas.drawRect(left, top, right,bottom, mBoxPaint);
+           for (Landmark landmark: face.getLandmarks()){
+               int cx = (int) translateX(landmark.getPosition().x );
+               int cy = (int) translateY(landmark.getPosition().y );
 
-            //landmark mit TypeIDs
-            //String type = String.valueOf(landmark.getType());
-            //mLandmarkPaint.setTextSize(50.0f);
-            //canvas.drawText(type, cx,cy, mLandmarkPaint);
+               if(landmark.getType()== Landmark.LEFT_EYE){
+                   Bitmap scaledGreenEyeBm = Bitmap.createScaledBitmap(bmapGreenEye,50,50,true);
 
-
-            if(landmark.getType()== Landmark.LEFT_EYE){
-              Bitmap scaledGreenEyeBm = Bitmap.createScaledBitmap(bmapGreenEye,50,50,true);
-
-              canvas.drawBitmap(scaledGreenEyeBm,cx,cy,mBoxPaint);
-             }
-           // if(landmark.getType()==Landmark.RIGHT_EYE){
-             //   Bitmap scaledEyepatchBm = Bitmap.createScaledBitmap(bmapEyepatch, 100,100,true);
-               // canvas.drawBitmap(scaledEyepatchBm,cx,cy, mBoxPaint);
-            //}
-
-
-        }
-
+                   canvas.drawBitmap(scaledGreenEyeBm,cx,cy,mBoxPaint);
+               }
+           }
+       }
+       else{
+           Log.d(TAG, "draw: nothing to draw");
+       }
     }
 
+    public static boolean isFilterenabled() {
+        if(!isFilterenabled){
+            isFilterenabled=true;
+           // MustacheEnabled mustache = new MustacheEnabled();
+            //mustache.setMustacheThere();
+
+
+            Log.d(TAG, "choseFilter: is false, set true");
+        }
+        else{
+           isFilterenabled =false;
+        }
+        return isFilterenabled;
+    }
 }
+
+

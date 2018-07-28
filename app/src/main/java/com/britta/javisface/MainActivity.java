@@ -57,7 +57,6 @@ public final class MainActivity extends AppCompatActivity {
     public static final String TAG ="JavisFace";
     private Context context;
     private CameraSource mCameraSource = null;
-    private CameraSource mCameraSource2;
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
     private static final int RC_HANDLE_GMS = 9001;
@@ -65,6 +64,13 @@ public final class MainActivity extends AppCompatActivity {
     private float mHappiness;
     private Button snapButton;
     private Button switchButton;
+    private Button filterButton;
+
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
 
 
@@ -80,6 +86,7 @@ public final class MainActivity extends AppCompatActivity {
         mGraphicOverlay = findViewById(R.id.faceOverlay);
         snapButton = findViewById(R.id.captureBtn);
         switchButton = findViewById(R.id.switchBtn);
+        filterButton = findViewById(R.id.filterBtn);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if(rc == PackageManager.PERMISSION_GRANTED){
@@ -105,6 +112,13 @@ public final class MainActivity extends AppCompatActivity {
                     switchCamera();
                     Log.d(TAG, "onClick: hallo?");
 
+                }
+            });
+            filterButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    putMustacheOnFace();
+                    Log.d(TAG, "hallo mustache");
                 }
             });
         }
@@ -255,16 +269,6 @@ public final class MainActivity extends AppCompatActivity {
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face){
             mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
-            mHappiness=face.getIsSmilingProbability()*100.0f;
-            if(mHappiness>= 50.0f){
-               // mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
-                 //   @Override
-                   // public void onPictureTaken(byte[] bytes) {
-                     //   snapPhoto(bytes);
-                    //}
-
-                //});
-            }
 
         }
         @Override
@@ -279,15 +283,13 @@ public final class MainActivity extends AppCompatActivity {
 
     }
 
-    public static void verifyStoragePermissions(Activity activity) {
-        int REQUEST_EXTERNAL_STORAGE = 1;
-        String[] PERMISSIONS_STORAGE = {
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-        };
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (permission != PackageManager.PERMISSION_GRANTED) {
 
+
+    public static void verifyStoragePermissions(Activity activity) {
+
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                     activity,
                     PERMISSIONS_STORAGE,
@@ -300,6 +302,7 @@ public final class MainActivity extends AppCompatActivity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         Bitmap face = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+
 
         mGraphicOverlay.setDrawingCacheEnabled(true);
         Bitmap overlay = mGraphicOverlay.getDrawingCache();
@@ -353,7 +356,7 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     public Bitmap mergeBitmaps(Bitmap face, Bitmap overlay) {
-        // Create a new image with target size
+      
         int width = face.getWidth();
         int height = face.getHeight();
         Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -368,5 +371,21 @@ public final class MainActivity extends AppCompatActivity {
         return newBitmap;
     }
 
+
+    public void putMustacheOnFace(){
+
+
+        GraphicOverlay mOverlay = new GraphicOverlay(context);
+
+        GraphicFaceTracker tracker = new GraphicFaceTracker(mOverlay);
+
+        tracker.mFaceGraphic.isFilterenabled();
+
+
+       // mGraphic.choseFilter();
+        Log.d(TAG, "putMustacheOnFace: check");
+
+
+    }
 
 }
