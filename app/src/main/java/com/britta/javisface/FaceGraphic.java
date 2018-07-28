@@ -44,6 +44,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
     private Bitmap bmapGreenEye;
     private Bitmap bmapEyepatch;
+    private Bitmap bmapMustache;
     private BitmapFactory.Options options;
     private Resources resources;
     public static boolean isFilterenabled;
@@ -63,6 +64,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         resources = context.getResources();
         bmapGreenEye = BitmapFactory.decodeResource(resources, R.drawable.akiszalia, options);
         bmapEyepatch = BitmapFactory.decodeResource(resources, R.drawable.eyepatch);
+        bmapMustache = BitmapFactory.decodeResource(resources, R.drawable.mustache);
 
         mCurrentColorIndex =(mCurrentColorIndex+1)% COLOR_CHOICES.length;
         final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
@@ -135,6 +137,10 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
                    Bitmap scaledGreenEyeBm = Bitmap.createScaledBitmap(bmapGreenEye,50,50,true);
 
                    canvas.drawBitmap(scaledGreenEyeBm,cx,cy,mBoxPaint);
+               }
+               if(landmark.getType() ==Landmark.NOSE_BASE){
+                   Bitmap scaledMustacheBM = Bitmap.createScaledBitmap(bmapMustache,200,100,true);
+                   canvas.drawBitmap(scaledMustacheBM, cx-100,cy, mLandmarkPaint);
                }
            }
        }
