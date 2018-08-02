@@ -9,8 +9,14 @@
     android:keepScreenOn="true">
 
     <Button
+        android:id="@+id/smileBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SMILE DETECTOR" />
+
+    <Button
         android:id="@+id/filterBtn"
-        android:layout_width="101dp"
+        android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"

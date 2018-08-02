@@ -65,6 +65,7 @@ public final class MainActivity extends AppCompatActivity {
     private Button snapButton;
     private Button switchButton;
     private Button filterButton;
+    private Button smileButton;
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
@@ -87,6 +88,7 @@ public final class MainActivity extends AppCompatActivity {
         snapButton = findViewById(R.id.captureBtn);
         switchButton = findViewById(R.id.switchBtn);
         filterButton = findViewById(R.id.filterBtn);
+        smileButton = findViewById(R.id.smileBtn);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if(rc == PackageManager.PERMISSION_GRANTED){
@@ -121,6 +123,12 @@ public final class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "hallo mustache");
                 }
             });
+            smileButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    detectSmile();
+                }
+            });
         }
         else{
             requestCameraPermission();
@@ -128,6 +136,8 @@ public final class MainActivity extends AppCompatActivity {
 
        /* */
     }
+
+
 
     private void requestCameraPermission() {
         Log.w(TAG, "App benötigt Zugriff auf die Kamera");
@@ -303,7 +313,6 @@ public final class MainActivity extends AppCompatActivity {
         BitmapFactory.Options options = new BitmapFactory.Options();
         Bitmap face = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
 
-
         mGraphicOverlay.setDrawingCacheEnabled(true);
         Bitmap overlay = mGraphicOverlay.getDrawingCache();
 
@@ -364,7 +373,7 @@ public final class MainActivity extends AppCompatActivity {
         Rect faceRect = new Rect(0,0,width,height);
         Rect overlayRect = new Rect(0,0,overlay.getWidth(),overlay.getHeight());
 
-        // Draw face and then overlay (Make sure rects are as needed)
+
         Canvas canvas = new Canvas(newBitmap);
         canvas.drawBitmap(face, faceRect, faceRect, null);
         canvas.drawBitmap(overlay, overlayRect, faceRect, null);
@@ -374,18 +383,20 @@ public final class MainActivity extends AppCompatActivity {
 
     public void putMustacheOnFace(){
 
-
         GraphicOverlay mOverlay = new GraphicOverlay(context);
-
         GraphicFaceTracker tracker = new GraphicFaceTracker(mOverlay);
-
         tracker.mFaceGraphic.isFilterenabled();
-
-
-       // mGraphic.choseFilter();
         Log.d(TAG, "putMustacheOnFace: check");
 
 
+    }
+
+    private void detectSmile() {
+
+        GraphicOverlay overlay = new GraphicOverlay(context);
+        GraphicFaceTracker tracker = new GraphicFaceTracker(overlay);
+        tracker.mFaceGraphic.isSmiling();
+        Log.d(TAG, "detectSmile: hello");
     }
 
 }

@@ -21,9 +21,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private static final float ID_X_OFFSET = -50.0f;
     private static final float BOX_STROKE_WIDTH = 5.0f;
 
-    private static final String TAG ="FaceGraphic";
-
-    
+    private static final String TAG ="FaceGraphic";    
 
     private static final int COLOR_CHOICES[]={
             Color.BLUE,
@@ -48,7 +46,8 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private BitmapFactory.Options options;
     private Resources resources;
     public static boolean isFilterenabled;
-
+    public static boolean isSmiling;
+    public boolean smiling = true;
 
     private volatile Face mFace;
     private int mFaceID;
@@ -106,8 +105,6 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         if(face == null){
             return;
         }
-        mHappiness = face.getIsSmilingProbability()*100;
-
 
 
         float x = translateX(face.getPosition().x + face.getWidth()/2);
@@ -127,7 +124,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
        if(isFilterenabled){
-           Log.d(TAG, "draw: helloo filterenabled is truee");
+           Log.d(TAG, "draw: helloo filterenabled is true");
            canvas.drawRect(left, top, right,bottom, mBoxPaint);
            for (Landmark landmark: face.getLandmarks()){
                int cx = (int) translateX(landmark.getPosition().x );
@@ -147,14 +144,24 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
        else{
            Log.d(TAG, "draw: nothing to draw");
        }
+       if(isSmiling) {
+           if(smiling) {
+               mHappiness = face.getIsSmilingProbability() * 100;
+                //Log.d(TAG, String.valueOf(mHappiness));
+               if (mHappiness > 70) {
+                   canvas.drawText("I see you smiling! ",x,y,mBoxPaint);
+                   Log.d(TAG, "Thank you, I see you smiling");
+               } else {
+                   canvas.drawText("you should smile more",x,y,mBoxPaint);
+                   Log.d(TAG, "pleaseSmile: you should smile more!");
+               }
+            }
+        }
     }
 
     public static boolean isFilterenabled() {
         if(!isFilterenabled){
             isFilterenabled=true;
-           // MustacheEnabled mustache = new MustacheEnabled();
-            //mustache.setMustacheThere();
-
 
             Log.d(TAG, "choseFilter: is false, set true");
         }
@@ -162,6 +169,16 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
            isFilterenabled =false;
         }
         return isFilterenabled;
+    }
+    
+    public static boolean isSmiling(){
+       if(isSmiling){
+           isSmiling =false;
+       }
+       else{
+           isSmiling = true;
+       }
+        return isSmiling;
     }
 }
 
