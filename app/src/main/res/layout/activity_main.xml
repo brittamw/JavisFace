@@ -10,37 +10,39 @@
 
     <Button
         android:id="@+id/smileBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="SMILE DETECTOR" />
+        android:text="@string/smile_button"
+        app:layout_constraintBottom_toBottomOf="@+id/filterBtn"
+        app:layout_constraintEnd_toStartOf="@+id/switchBtn"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/filterBtn" />
 
     <Button
         android:id="@+id/filterBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="Mustache"
-        app:layout_constraintBottom_toTopOf="@+id/switchBtn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.521"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/filter_button"
+        app:layout_constraintBottom_toTopOf="@+id/captureBtn"
+        app:layout_constraintEnd_toStartOf="@+id/smileBtn"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/switchBtn"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:text="SWITCH"
-        app:layout_constraintBottom_toTopOf="@+id/captureBtn"
+        android:layout_height="wrap_content"
+        android:text="@string/switch_button"
+        app:layout_constraintBottom_toBottomOf="@+id/smileBtn"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/smileBtn" />
 
     <Button
         android:id="@+id/captureBtn"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:text="SNAP"
+        android:text="@string/snap_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

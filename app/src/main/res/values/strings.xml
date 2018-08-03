@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">JavisFace</string>
+    <string name="snap_button">SNAP</string>
+    <string name="switch_button">SWITCH</string>
+    <string name="filter_button">MUSTACHE</string>
+    <string name="smile_button">SMILE!</string>
+
 </resources>

@@ -149,10 +149,10 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
                mHappiness = face.getIsSmilingProbability() * 100;
                 //Log.d(TAG, String.valueOf(mHappiness));
                if (mHappiness > 70) {
-                   canvas.drawText("I see you smiling! ",x,y,mBoxPaint);
-                   Log.d(TAG, "Thank you, I see you smiling");
+                   canvas.drawText("I see you smiling! ",x,y,mIDPaint);
+                   Log.d(TAG, "You're smiling! You should snap a photo!");
                } else {
-                   canvas.drawText("you should smile more",x,y,mBoxPaint);
+                   canvas.drawText("you should smile more",x,y,mIDPaint);
                    Log.d(TAG, "pleaseSmile: you should smile more!");
                }
             }
