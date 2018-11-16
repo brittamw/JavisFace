@@ -83,8 +83,6 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         mLandmarkPaint = new Paint();
         mLandmarkPaint.setColor(selectedColor);
 
-
-
     }
 
     void setID(int id) {
@@ -99,13 +97,10 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     @Override
     public void draw(Canvas canvas) {
 
-
-
         Face face = mFace;
         if(face == null){
             return;
         }
-
 
         float x = translateX(face.getPosition().x + face.getWidth()/2);
         float y = translateY(face.getPosition().y + face.getHeight()/2);
@@ -122,19 +117,18 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         float bottom = y+yOffset;
 
 
-
        if(isFilterenabled){
            Log.d(TAG, "draw: helloo filterenabled is true");
-           canvas.drawRect(left, top, right,bottom, mBoxPaint);
+           //canvas.drawRect(left, top, right,bottom, mBoxPaint);
            for (Landmark landmark: face.getLandmarks()){
                int cx = (int) translateX(landmark.getPosition().x );
                int cy = (int) translateY(landmark.getPosition().y );
 
-               if(landmark.getType()== Landmark.LEFT_EYE){
-                   Bitmap scaledGreenEyeBm = Bitmap.createScaledBitmap(bmapGreenEye,50,50,true);
+               //if(landmark.getType()== Landmark.LEFT_EYE){
+                //   Bitmap scaledGreenEyeBm = Bitmap.createScaledBitmap(bmapGreenEye,50,50,true);
 
-                   canvas.drawBitmap(scaledGreenEyeBm,cx,cy,mBoxPaint);
-               }
+                 //  canvas.drawBitmap(scaledGreenEyeBm,cx,cy,mBoxPaint);
+              // }
                if(landmark.getType() ==Landmark.NOSE_BASE){
                    Bitmap scaledMustacheBM = Bitmap.createScaledBitmap(bmapMustache,200,100,true);
                    canvas.drawBitmap(scaledMustacheBM, cx-100,cy, mLandmarkPaint);
@@ -149,10 +143,10 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
                mHappiness = face.getIsSmilingProbability() * 100;
                 //Log.d(TAG, String.valueOf(mHappiness));
                if (mHappiness > 70) {
-                   canvas.drawText("I see you smiling! ",x,y,mIDPaint);
+                   canvas.drawText("I see you smiling! Quick, snap a photo! ",x,y,mIDPaint);
                    Log.d(TAG, "You're smiling! You should snap a photo!");
                } else {
-                   canvas.drawText("you should smile more",x,y,mIDPaint);
+                   canvas.drawText("Say CHEEEESE!",x,y,mIDPaint);
                    Log.d(TAG, "pleaseSmile: you should smile more!");
                }
             }

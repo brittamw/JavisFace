@@ -61,16 +61,18 @@ public final class MainActivity extends AppCompatActivity {
     private GraphicOverlay mGraphicOverlay;
     private static final int RC_HANDLE_GMS = 9001;
     private static final int RC_HANDLE_CAMERA_PERM = 2;
-    private float mHappiness;
     private Button snapButton;
     private Button switchButton;
     private Button filterButton;
     private Button smileButton;
 
+    private static boolean isSmiledetectorActive = false;
+
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+
     };
 
 
@@ -100,12 +102,13 @@ public final class MainActivity extends AppCompatActivity {
                     mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
                         @Override
                         public void onPictureTaken(byte[] bytes) {
+                            mGraphicOverlay.setDrawingCacheEnabled(true);
+                            Bitmap overlay = mGraphicOverlay.getDrawingCache();
                             snapPhoto(bytes);
                         }
 
                     });
                     Log.d(TAG, "onClick: Hello");
-                    //snapButton.setEnabled(false);
                 }
             });
             switchButton.setOnClickListener(new View.OnClickListener() {
@@ -134,7 +137,6 @@ public final class MainActivity extends AppCompatActivity {
             requestCameraPermission();
         }
 
-       /* */
     }
 
 
@@ -316,25 +318,51 @@ public final class MainActivity extends AppCompatActivity {
         mGraphicOverlay.setDrawingCacheEnabled(true);
         Bitmap overlay = mGraphicOverlay.getDrawingCache();
 
-        Bitmap result = mergeBitmaps(face, overlay);
 
-        try {
-            String mainpath = Environment.getExternalStorageDirectory().getAbsolutePath()+File.separator;
-            File basePath = new File(mainpath);
-            if (!basePath.exists())
-                Log.d("CAPTURE_BASE_PATH", basePath.mkdirs() ? "Success": "Failed");
-            String path = mainpath + "photo_" + getPhotoTime() + ".jpg";
-            File captureFile = new File(path);
-            captureFile.createNewFile();
-            if (!captureFile.exists())
-                Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success": "Failed");
-            FileOutputStream stream = new FileOutputStream(captureFile);
-            result.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            stream.flush();
-            stream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            try {
+                String mainpath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
+                File basePath = new File(mainpath);
+                if (!basePath.exists())
+                    Log.d("CAPTURE_BASE_PATH", basePath.mkdirs() ? "Success" : "Failed");
+                String path = mainpath + "photo_" + getPhotoTime() + ".jpg";
+                File captureFile = new File(path);
+                captureFile.createNewFile();
+                if (!captureFile.exists())
+                    Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success" : "Failed");
+                FileOutputStream stream = new FileOutputStream(captureFile);
+                if(mCameraSource.getCameraFacing()==CameraSource.CAMERA_FACING_FRONT){
+                    Matrix mtx = new Matrix();
+                    //this will prevent mirror effect
+                    mtx.preScale(-1.0f, 1.0f);
+                    Bitmap newImage = Bitmap.createBitmap(face, 0, 0, face.getWidth(), face.getHeight(), mtx, true);
+                    if(isSmiledetectorActive){
+                        newImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+                    }else{
+                        Bitmap result = mergeBitmaps(newImage, overlay);
+                        result.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+                    }
+                }else{
+                    if(isSmiledetectorActive){
+                        face.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+                    }else{
+                        Bitmap result = mergeBitmaps(face, overlay);
+                        result.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+                    }
+                }
+
+                stream.flush();
+                stream.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
 
 
     }
@@ -389,6 +417,7 @@ public final class MainActivity extends AppCompatActivity {
         Log.d(TAG, "putMustacheOnFace: check");
 
 
+
     }
 
     private void detectSmile() {
@@ -397,6 +426,12 @@ public final class MainActivity extends AppCompatActivity {
         GraphicFaceTracker tracker = new GraphicFaceTracker(overlay);
         tracker.mFaceGraphic.isSmiling();
         Log.d(TAG, "detectSmile: hello");
+        if (!isSmiledetectorActive){
+            isSmiledetectorActive = true;
+        }
+        else{
+            isSmiledetectorActive=false;
+        }
     }
 
 }
