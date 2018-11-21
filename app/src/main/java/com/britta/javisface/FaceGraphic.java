@@ -105,49 +105,44 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         float x = translateX(face.getPosition().x + face.getWidth()/2);
         float y = translateY(face.getPosition().y + face.getHeight()/2);
         //canvas.drawCircle(x,y, FACE_POSITION_RADIUS,mFacePositionPaint);
-
        //canvas.drawText("Happines: "+Math.floor(mHappiness)+ "%", x,y,mIDPaint);
-
-        float xOffset = scaleX(face.getWidth()/2.0f);
-        float yOffset = scaleY(face.getHeight()/2.0f);
-
-        float left = x -xOffset;
-        float top = y-yOffset;
-        float right = x + xOffset;
-        float bottom = y+yOffset;
-
+        //float xOffset = scaleX(face.getWidth()/2.0f);
+        //float yOffset = scaleY(face.getHeight()/2.0f);
+        //float left = x -xOffset;
+        //float top = y-yOffset;
+        //float right = x + xOffset;
+        //float bottom = y+yOffset;
+        //canvas.drawRect(left, top, right,bottom, mBoxPaint);
+        int scaleFactorFilterWidth =(int)face.getWidth()/2;
+        int scaleFactorFilterheight = (int)face.getHeight()/6;
 
        if(isFilterenabled){
            Log.d(TAG, "draw: helloo filterenabled is true");
-           //canvas.drawRect(left, top, right,bottom, mBoxPaint);
+
            for (Landmark landmark: face.getLandmarks()){
                int cx = (int) translateX(landmark.getPosition().x );
                int cy = (int) translateY(landmark.getPosition().y );
-
-               //if(landmark.getType()== Landmark.LEFT_EYE){
-                //   Bitmap scaledGreenEyeBm = Bitmap.createScaledBitmap(bmapGreenEye,50,50,true);
-
-                 //  canvas.drawBitmap(scaledGreenEyeBm,cx,cy,mBoxPaint);
-              // }
+               //canvas.drawCircle(cx,cy,10f,mLandmarkPaint);
                if(landmark.getType() ==Landmark.NOSE_BASE){
-                   Bitmap scaledMustacheBM = Bitmap.createScaledBitmap(bmapMustache,200,100,true);
-                   canvas.drawBitmap(scaledMustacheBM, cx-100,cy, mLandmarkPaint);
+                   Bitmap scaledMustacheBM = Bitmap.createScaledBitmap(bmapMustache, scaleFactorFilterWidth,scaleFactorFilterheight,true);
+                    canvas.drawBitmap(scaledMustacheBM, cx-(scaleFactorFilterWidth/2),cy, mLandmarkPaint);
                }
            }
        }
        else{
            Log.d(TAG, "draw: nothing to draw");
        }
+
        if(isSmiling) {
            if(smiling) {
                mHappiness = face.getIsSmilingProbability() * 100;
                 //Log.d(TAG, String.valueOf(mHappiness));
                if (mHappiness > 70) {
-                   canvas.drawText("I see you smiling! Quick, snap a photo! ",x,y,mIDPaint);
-                   Log.d(TAG, "You're smiling! You should snap a photo!");
+                   canvas.drawText("You're smiling! Quick, snap a photo! ",x,y,mIDPaint);
+                   //Log.d(TAG, "You're smiling! You should snap a photo!");
                } else {
                    canvas.drawText("Say CHEEEESE!",x,y,mIDPaint);
-                   Log.d(TAG, "pleaseSmile: you should smile more!");
+                   //Log.d(TAG, "pleaseSmile: you should smile more!");
                }
             }
         }
@@ -156,8 +151,6 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     public static boolean isFilterenabled() {
         if(!isFilterenabled){
             isFilterenabled=true;
-
-            Log.d(TAG, "choseFilter: is false, set true");
         }
         else{
            isFilterenabled =false;
