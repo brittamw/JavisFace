@@ -135,13 +135,15 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
        if(isSmiling) {
            if(smiling) {
+               canvas.drawText("Happines: " +Math.floor(mHappiness)+ " %", x-100,y-100,mIDPaint);
                mHappiness = face.getIsSmilingProbability() * 100;
                 //Log.d(TAG, String.valueOf(mHappiness));
                if (mHappiness > 70) {
-                   canvas.drawText("You're smiling! Quick, snap a photo! ",x,y,mIDPaint);
+                   canvas.drawText("You're smiling! Quick, snap a photo! ",x-100,y-200,mIDPaint);
+                   //
                    //Log.d(TAG, "You're smiling! You should snap a photo!");
                } else {
-                   canvas.drawText("Say CHEEEESE!",x,y,mIDPaint);
+                   canvas.drawText("Say CHEEEESE!",x-100,y-200,mIDPaint);
                    //Log.d(TAG, "pleaseSmile: you should smile more!");
                }
             }
