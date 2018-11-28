@@ -357,11 +357,6 @@ public final class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
-
-
-
     }
     private String getPhotoTime(){
         SimpleDateFormat dateFormat = new SimpleDateFormat("ddMMyy_hhmmss");
@@ -404,7 +399,7 @@ public final class MainActivity extends AppCompatActivity {
     }
 
 
-    public void putMustacheOnFace(){
+    private void putMustacheOnFace(){
 
         GraphicOverlay mOverlay = new GraphicOverlay(context);
         GraphicFaceTracker tracker = new GraphicFaceTracker(mOverlay);
