@@ -89,7 +89,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         int scaleFactorFilterheight = (int)face.getHeight()/6;
 
        if(isFilterenabled){
-           Log.d(TAG, "draw: helloo filterenabled is true");
+           //Log.d(TAG, "draw: helloo filterenabled is true");
 
            for (Landmark landmark: face.getLandmarks()){
                int cx = (int) translateX(landmark.getPosition().x );
@@ -102,7 +102,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
            }
        }
        else{
-           Log.d(TAG, "draw: nothing to draw");
+          // Log.d(TAG, "draw: nothing to draw");
        }
 
        if(isSmiling) {
@@ -110,7 +110,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
                mHappiness = face.getIsSmilingProbability() * 100;
                canvas.drawText("Happines: " +Math.floor(mHappiness)+ " %", x-100,y-100,mSmilePaint);
                if (mHappiness > 70) {
-                   canvas.drawText("You're smiling! Quick, snap a photo! ",x-100,y-200,mSmilePaint);
+                   canvas.drawText("Smiling! Snap a photo! ",x-100,y-200,mSmilePaint);
                } else {
                    canvas.drawText("Say CHEEEESE!",x-100,y-200,mSmilePaint);
                }

@@ -5,8 +5,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -15,22 +13,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.hardware.camera2.CameraManager;
-import android.media.ImageReader;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Trace;
-import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Size;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.britta.javisface.ui.camera.CameraSourcePreview;
 import com.britta.javisface.ui.camera.GraphicOverlay;
@@ -43,11 +33,9 @@ import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -60,25 +48,13 @@ public final class MainActivity extends AppCompatActivity {
     private CameraSourcePreview mPreview;
     private GraphicOverlay mGraphicOverlay;
     private static final int RC_HANDLE_GMS = 9001;
-    private static final int RC_HANDLE_CAMERA_PERM = 2;
+    private static final int HANDLE_CAMERA_STORAGE_PERM = 2;
     private Button snapButton;
     private Button switchButton;
     private Button filterButton;
     private Button smileButton;
 
     private static boolean isSmiledetectorActive = false;
-
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-
-    };
-
-
-
-
-
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -93,61 +69,59 @@ public final class MainActivity extends AppCompatActivity {
         smileButton = findViewById(R.id.smileBtn);
 
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if(rc == PackageManager.PERMISSION_GRANTED){
+        int bc = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if(rc == PackageManager.PERMISSION_GRANTED && bc ==PackageManager.PERMISSION_GRANTED){
             createCameraSource(1);
-            verifyStoragePermissions(this);
-            snapButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
-                        @Override
-                        public void onPictureTaken(byte[] bytes) {
-                            mGraphicOverlay.setDrawingCacheEnabled(true);
-                            Bitmap overlay = mGraphicOverlay.getDrawingCache();
-                            snapPhoto(bytes);
-                        }
-
-                    });
-                    Log.d(TAG, "onClick: Hello");
-                }
-            });
-            switchButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    switchCamera();
-                    Log.d(TAG, "onClick: hallo?");
-
-                }
-            });
-            filterButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    putMustacheOnFace();
-                    Log.d(TAG, "hallo mustache");
-                }
-            });
-            smileButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    detectSmile();
-                }
-            });
         }
-        else{
-            requestCameraPermission();
+        else {
+            requestCameraAndStoragePermissions();
         }
+        snapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mCameraSource.takePicture(null, new CameraSource.PictureCallback() {
+                    @Override
+                    public void onPictureTaken(byte[] bytes) {
+                        snapPhoto(bytes);
+                    }
 
+                });
+                Log.d(TAG, "onClick: Hello");
+            }
+        });
+        switchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchCamera();
+                Log.d(TAG, "onClick: hallo?");
+
+            }
+        });
+        filterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                putMustacheOnFace();
+                Log.d(TAG, "hallo mustache");
+            }
+        });
+        smileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                detectSmile();
+            }
+        });
     }
 
 
 
-    private void requestCameraPermission() {
-        Log.w(TAG, "App benötigt Zugriff auf die Kamera");
+    private void requestCameraAndStoragePermissions() {
+        Log.w(TAG, "App benötigt Zugriff auf die Kamera und den Speicher");
 
-        final String[] permissions = new String[]{Manifest.permission.CAMERA};
+        final String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,};
 
         if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
+            ActivityCompat.requestPermissions(this, permissions, HANDLE_CAMERA_STORAGE_PERM);
             return;
 
         }
@@ -158,7 +132,7 @@ public final class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ActivityCompat.requestPermissions(recentActivity, permissions,
-                        RC_HANDLE_CAMERA_PERM);
+                        HANDLE_CAMERA_STORAGE_PERM);
             }
         };
 
@@ -207,14 +181,14 @@ public final class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
-        if(requestCode != RC_HANDLE_CAMERA_PERM){
+        if(requestCode != HANDLE_CAMERA_STORAGE_PERM){
             Log.d(TAG, "unerwartetes Zugriffsergebnis: "+requestCode);
             super.onRequestPermissionsResult(requestCode,permissions,grantResults);
             return;
         }
 
         if(grantResults.length != 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-            Log.d(TAG, "Zugriff erlaubt. Kamera wird initialisiert");
+            Log.d(TAG, "Zugriff erlaubt");
             createCameraSource(1);
             return;
         }
@@ -229,7 +203,7 @@ public final class MainActivity extends AppCompatActivity {
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Javis Face").setMessage("App kann nicht ausgeführt werden, da kein Kamerazugriff gewährt")
+        builder.setTitle("Javis Face").setMessage("App kann nicht ausgeführt werden, Kamera oder Speicher Zugriff nicht gegeben ist")
                 .setPositiveButton("OK", listener).show();
     }
 
@@ -293,21 +267,6 @@ public final class MainActivity extends AppCompatActivity {
             mOverlay.remove(mFaceGraphic);
         }
 
-    }
-
-
-
-    public static void verifyStoragePermissions(Activity activity) {
-
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
     }
 
     private void snapPhoto(byte[] bytes){
