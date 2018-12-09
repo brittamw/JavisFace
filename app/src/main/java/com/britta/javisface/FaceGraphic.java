@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 
 import com.britta.javisface.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
@@ -17,32 +16,19 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
 
     private static final float TEXT_SIZE = 40.0f;
-    private static final String TAG ="FaceGraphic";
-    private static final int COLOR_CHOICES[]={
-            Color.BLUE,
-            Color.CYAN,
-            Color.GREEN,
-            Color.RED,
-            Color.MAGENTA,
-            Color.WHITE,
-            Color.BLACK,
-            Color.YELLOW
-
-    };
-    private static int mCurrentColorIndex = 0;
+    private static final int TEXT_COLOR = Color.GREEN;
     private Paint mSmilePaint;
     private Paint mLandmarkPaint;
-
     private Bitmap bmapMustache;
     private BitmapFactory.Options options;
     private Resources resources;
-    public static boolean isFilterenabled;
-    public static boolean isSmiling;
-    public boolean smiling = true;
+    private static boolean isFilterEnabled;
+    private static boolean isSmiling;
+    private boolean smiling = true;
 
     private volatile Face mFace;
     private int mFaceID;
-    private float mHappiness;
+    private float mSmiling;
     
 
     public FaceGraphic(GraphicOverlay overlay, Context context){
@@ -53,15 +39,11 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         resources = context.getResources();
         bmapMustache = BitmapFactory.decodeResource(resources, R.drawable.mustache);
 
-        mCurrentColorIndex =(mCurrentColorIndex+1)% COLOR_CHOICES.length;
-        final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
-
         mSmilePaint = new Paint();
-        mSmilePaint.setColor(selectedColor);
+        mSmilePaint.setColor(TEXT_COLOR);
         mSmilePaint.setTextSize(TEXT_SIZE);
 
         mLandmarkPaint = new Paint();
-        mLandmarkPaint.setColor(selectedColor);
 
     }
 
@@ -88,7 +70,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         int scaleFactorFilterWidth =(int)face.getWidth()/2;
         int scaleFactorFilterheight = (int)face.getHeight()/6;
 
-       if(isFilterenabled){
+       if(isFilterEnabled){
            //Log.d(TAG, "draw: helloo filterenabled is true");
 
            for (Landmark landmark: face.getLandmarks()){
@@ -107,9 +89,12 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
 
        if(isSmiling) {
            if(smiling) {
-               mHappiness = face.getIsSmilingProbability() * 100;
-               canvas.drawText("Happines: " +Math.floor(mHappiness)+ " %", x-100,y-100,mSmilePaint);
-               if (mHappiness > 70) {
+               mSmiling = face.getIsSmilingProbability() * 100;
+               if(mSmiling<=0){
+                   mSmiling = 0;
+               }
+               canvas.drawText("Happiness: " +Math.floor(mSmiling)+ " %", x-100,y-100,mSmilePaint);
+               if (mSmiling > 70) {
                    canvas.drawText("Smiling! Snap a photo! ",x-100,y-200,mSmilePaint);
                } else {
                    canvas.drawText("Say CHEEEESE!",x-100,y-200,mSmilePaint);
@@ -118,24 +103,22 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
         }
     }
 
-    public static boolean isFilterenabled() {
-        if(!isFilterenabled){
-            isFilterenabled=true;
+    public static void setFilterEnabled() {
+        if(!isFilterEnabled){
+            isFilterEnabled =true;
         }
         else{
-           isFilterenabled =false;
+           isFilterEnabled =false;
         }
-        return isFilterenabled;
     }
     
-    public static boolean isSmiling(){
+    public static void setSmilingEnabled(){
        if(isSmiling){
            isSmiling =false;
        }
        else{
            isSmiling = true;
        }
-        return isSmiling;
     }
 }
 

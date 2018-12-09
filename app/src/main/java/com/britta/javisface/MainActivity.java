@@ -4,7 +4,6 @@ package com.britta.javisface;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -24,8 +23,6 @@ import android.widget.Button;
 
 import com.britta.javisface.ui.camera.CameraSourcePreview;
 import com.britta.javisface.ui.camera.GraphicOverlay;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.CameraSource;
 
 import com.google.android.gms.vision.MultiProcessor;
@@ -53,7 +50,6 @@ public final class MainActivity extends AppCompatActivity {
     private Button switchButton;
     private Button filterButton;
     private Button smileButton;
-
     private static boolean isSmiledetectorActive = false;
 
     @Override
@@ -86,14 +82,12 @@ public final class MainActivity extends AppCompatActivity {
                     }
 
                 });
-                Log.d(TAG, "onClick: Hello");
             }
         });
         switchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 switchCamera();
-                Log.d(TAG, "onClick: hallo?");
 
             }
         });
@@ -101,7 +95,6 @@ public final class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 putMustacheOnFace();
-                Log.d(TAG, "hallo mustache");
             }
         });
         smileButton.setOnClickListener(new View.OnClickListener() {
@@ -123,7 +116,6 @@ public final class MainActivity extends AppCompatActivity {
         if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
             ActivityCompat.requestPermissions(this, permissions, HANDLE_CAMERA_STORAGE_PERM);
             return;
-
         }
 
         final Activity recentActivity = this;
@@ -136,7 +128,7 @@ public final class MainActivity extends AppCompatActivity {
             }
         };
 
-        Snackbar.make(mGraphicOverlay, "Gesichterkennung benötigt Kamerazugriff", Snackbar.LENGTH_INDEFINITE)
+        Snackbar.make(mGraphicOverlay, "Gesichterkennung benötigt Kamera- und Speicherzugriff", Snackbar.LENGTH_INDEFINITE)
                 .setAction("Ok", listener)
                 .show();
 
@@ -156,8 +148,6 @@ public final class MainActivity extends AppCompatActivity {
         mCameraSource = new CameraSource.Builder(context, detector).setRequestedPreviewSize(640, 480)
                 .setFacing(facing).setRequestedFps(30.0f).build();
     }
-
-
 
     @Override
     protected void onResume(){
@@ -188,14 +178,9 @@ public final class MainActivity extends AppCompatActivity {
         }
 
         if(grantResults.length != 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-            Log.d(TAG, "Zugriff erlaubt");
             createCameraSource(1);
             return;
         }
-
-        Log.e(TAG, "Zugriff nicht erlaubt:  " + grantResults.length +
-                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
-
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 finish();
@@ -203,20 +188,12 @@ public final class MainActivity extends AppCompatActivity {
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Javis Face").setMessage("App kann nicht ausgeführt werden, Kamera oder Speicher Zugriff nicht gegeben ist")
+        builder.setTitle("Javis Face").setMessage("App kann nicht ausgeführt werden. Kamera- oder Speicher Zugriff nicht gegeben")
                 .setPositiveButton("OK", listener).show();
     }
 
 
-
     private void startCameraSource(){
-
-        int code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext());
-
-        if(code!= ConnectionResult.SUCCESS){
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS);
-            dialog.show();
-        }
 
         if(mCameraSource !=null){
             try{
@@ -228,7 +205,6 @@ public final class MainActivity extends AppCompatActivity {
                 mCameraSource =null;
             }
         }
-
     }
 
     private class GraphicFaceTrackerFactory implements MultiProcessor.Factory<Face>{
@@ -272,40 +248,45 @@ public final class MainActivity extends AppCompatActivity {
     private void snapPhoto(byte[] bytes){
 
         BitmapFactory.Options options = new BitmapFactory.Options();
-        Bitmap face = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+        Bitmap cameraData = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
 
         mGraphicOverlay.setDrawingCacheEnabled(true);
         Bitmap overlay = mGraphicOverlay.getDrawingCache();
 
             try {
-                String mainpath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
-                File basePath = new File(mainpath);
-                if (!basePath.exists())
-                    Log.d("CAPTURE_BASE_PATH", basePath.mkdirs() ? "Success" : "Failed");
-                String path = mainpath + "photo_" + getPhotoTime() + ".jpg";
-                File captureFile = new File(path);
-                captureFile.createNewFile();
-                if (!captureFile.exists())
-                    Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success" : "Failed");
-                FileOutputStream stream = new FileOutputStream(captureFile);
-                //Front Kamera Bild spiegeln
+                String pathToFolder = Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES
+                ) + File.separator;
+                File file = new File(pathToFolder);
+                if(!file.exists()){
+                    file.mkdirs();
+                }
+                String pathToFile = pathToFolder + "foto_"+getPhotoTime()+".jpg";
+                File photo = new File(pathToFile);
+                photo.createNewFile();
+                if (!photo.exists()){
+                    photo.createNewFile();
+                }
+                FileOutputStream stream = new FileOutputStream(photo);
+
                 if(mCameraSource.getCameraFacing()==CameraSource.CAMERA_FACING_FRONT){
                     Matrix mtx = new Matrix();
                     mtx.preScale(-1.0f, 1.0f);
-                    Bitmap frontFace = Bitmap.createBitmap(face, 0, 0, face.getWidth(), face.getHeight(), mtx, true);
+                    Bitmap frontFace = Bitmap.createBitmap(cameraData, 0, 0, cameraData.getWidth(), cameraData.getHeight(), mtx, true);
                     if(isSmiledetectorActive){
                         frontFace.compress(Bitmap.CompressFormat.PNG, 100, stream);
 
                     }else{
-                        Bitmap result = mergeBitmaps(frontFace, overlay);
-                        result.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        Bitmap frontCameraAndOverlay = combineOverlay(frontFace, overlay);
+                        frontCameraAndOverlay.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
                     }
                 }else{
                     if(isSmiledetectorActive){
-                        face.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        cameraData.compress(Bitmap.CompressFormat.PNG, 100, stream);
                     }else{
-                        Bitmap result = mergeBitmaps(face, overlay);
-                        result.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        Bitmap rearCameraAndOverlay = combineOverlay(cameraData, overlay);
+                        rearCameraAndOverlay.compress(Bitmap.CompressFormat.PNG, 100, stream);
                     }
                 }
 
@@ -322,6 +303,8 @@ public final class MainActivity extends AppCompatActivity {
 
         return dateFormat.format(new Date());
     }
+
+
 
     private void switchCamera(){
 
@@ -343,35 +326,28 @@ public final class MainActivity extends AppCompatActivity {
         startCameraSource();
     }
 
-    public Bitmap mergeBitmaps(Bitmap face, Bitmap overlay) {
+    public Bitmap combineOverlay(Bitmap cameraData, Bitmap overlay) {
       
-        int width = face.getWidth();
-        int height = face.getHeight();
-        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        int width = cameraData.getWidth();
+        int height = cameraData.getHeight();
+        Bitmap combinedBM = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
-        Rect faceRect = new Rect(0,0,width,height);
+        Rect cameraRect = new Rect(0,0,width,height);
         Rect overlayRect = new Rect(0,0,overlay.getWidth(),overlay.getHeight());
-        Canvas canvas = new Canvas(newBitmap);
-        canvas.drawBitmap(face, faceRect, faceRect, null);
-        canvas.drawBitmap(overlay, overlayRect, faceRect, null);
-        return newBitmap;
+        Canvas canvas = new Canvas(combinedBM);
+        canvas.drawBitmap(cameraData, cameraRect, cameraRect, null);
+        canvas.drawBitmap(overlay, overlayRect, cameraRect, null);
+        return combinedBM;
     }
 
 
     private void putMustacheOnFace(){
 
-        GraphicOverlay mOverlay = new GraphicOverlay(context);
-        GraphicFaceTracker tracker = new GraphicFaceTracker(mOverlay);
-        tracker.mFaceGraphic.isFilterenabled();
-       // Log.d(TAG, "putMustacheOnFace: check");
+        FaceGraphic.setFilterEnabled();
     }
 
     private void detectSmile() {
-
-        GraphicOverlay overlay = new GraphicOverlay(context);
-        GraphicFaceTracker tracker = new GraphicFaceTracker(overlay);
-        tracker.mFaceGraphic.isSmiling();
-       // Log.d(TAG, "detectSmile: hello");
+        FaceGraphic.setSmilingEnabled();
         if (!isSmiledetectorActive){
             isSmiledetectorActive = true;
         }
